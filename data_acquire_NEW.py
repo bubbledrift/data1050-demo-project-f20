@@ -17,21 +17,21 @@ utils.setup_logger(logger, 'data.log')
 def download_csv(url=DOWNLOAD_URL, retries=MAX_DOWNLOAD_ATTEMPT):
     """Downloads the csv file from the web.
     """
-    csv = None
+    text = None
     for i in range(retries):
         try:
             print("try ", retries)
             req = requests.get(url, timeout=30.0)
             req.raise_for_status()
-            csv = req.text
+            text = req.text
         except requests.exceptions.HTTPError as e:
             #logger.warning("Retry on HTTP Error: {}".format(e))
             print("Retry on HTTP Error")
-    if csv is None:
+    if text is None:
         print('download_csv too many FAILED attempts')
         logger.error('download_csv too many FAILED attempts')
 
-    df = pandas.read_csv(csv)
+    df = pandas.read_csv(StringIO(text), delimiter='\t')
     df.to_csv('downloaddata.csv')
 
 
