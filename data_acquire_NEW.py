@@ -20,29 +20,22 @@ def download_csv(url=DOWNLOAD_URL, retries=MAX_DOWNLOAD_ATTEMPT):
     text = None
     for i in range(retries):
         try:
-            print("try ", retries)
             req = requests.get(url, timeout=30.0)
             req.raise_for_status()
             text = req.text
         except requests.exceptions.HTTPError as e:
-            #logger.warning("Retry on HTTP Error: {}".format(e))
-            print("Retry on HTTP Error")
+            logger.warning("Retry on HTTP Error: {}".format(e))
     if text is None:
-        print('download_csv too many FAILED attempts')
         logger.error('download_csv too many FAILED attempts')
+    return text
 
-    df = pandas.read_csv(StringIO(text), delimiter='\t')
-    df.to_csv('downloaddata.csv')
-
-
-def filter_csv(csv):
-    """Converts `text` to `DataFrame`, removes empty lines and descriptions
+def filter_csv(text):
+    """Converts `text` to `DataFrame`
     """
-    print("1")
-    
-    print("2")
-    
-    print("3")
+    df = pandas.read_csv(StringIO(text), usecols=["submission_date", "pnew_case", "new_case", "tot_cases", "state"])
+    df['date'] = pandas.to_datetime(df['submission_date'])
+    df.drop(columns=['submission_date'], axis=1, inplace=True)
+    df.to_csv('downloaddata.csv')
     #return df
 
 
@@ -80,6 +73,7 @@ def main_loop(timeout=DOWNLOAD_PERIOD):
 
 if __name__ == '__main__':
     #main_loop()
-    download_csv()
+    txt = download_csv()
+    filter_csv(txt)
 
 
