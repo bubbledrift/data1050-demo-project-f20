@@ -32,7 +32,7 @@ def download_csv(url=DOWNLOAD_URL, retries=MAX_DOWNLOAD_ATTEMPT):
 def filter_csv(text):
     """Converts `text` to `DataFrame`
     """
-    df = pandas.read_csv(StringIO(text), usecols=["submission_date", "pnew_case", "new_case", "tot_cases", "state"])
+    df = pandas.read_csv(StringIO(text), usecols=["created_at", "pnew_case", "new_case", "tot_cases", "state"])
     df['date'] = pandas.to_datetime(df['submission_date'])
     df.drop(columns=['submission_date'], axis=1, inplace=True)
     df.to_csv('downloaddata.csv')

@@ -24,13 +24,6 @@ def page_header():
     return html.Div(id='header', children=[
         html.Div([html.H3('Visualization with datashader and Plotly')],
                  className="ten columns"),
-        html.A([html.Img(id='logo', src=app.get_asset_url('github.png'),
-                         style={'height': '35px', 'paddingTop': '7%'}),
-                html.Span('Blownhither', style={'fontSize': '2rem', 'height': '35px', 'bottom': 0,
-                                                'paddingLeft': '4px', 'color': '#a3a7b0',
-                                                'textDecoration': 'none'})],
-               className="two columns row",
-               href='https://github.com/blownhither/'),
     ], className="row")
 
 
@@ -39,25 +32,23 @@ def description():
     Returns overall project description in markdown
     """
     return html.Div(children=[dcc.Markdown('''
-        # Energy Planner
-        As of today, 138 cities in the U.S. have formally announced 100% renewable energy goals or
-        targets, while others are actively considering similar goals. Despite ambition and progress,
-        conversion towards renewable energy remains challenging.
+        # Covid Dashboard
+        Since 2020, there have been over 50 million recorded Covid-19 cases in the United States.
+        While vaccinations and public safety measures have greatly reduced the spread and impact of 
+        covid on daily life, new variants and surges mean that continued testing and vigiliance is called for.
 
-        Wind and solar power are becoming more cost effective, but they will always be unreliable
-        and intermittent sources of energy. They follow weather patterns with potential for lots of
-        variability. Solar power starts to die away right at sunset, when one of the two daily peaks
-        arrives (see orange curve for load).
+        Most cases currently are asymptotic and minor, meaning that contagious individuals may not get tested.
+        This is why reported case counts are not accurate representations of the actual spread of covid within a
+        region.
 
-        **Energy Planner is a "What-If" tool to assist making power conversion plans.**
-        It can be used to explore load satisfiability under different power contribution with 
-        near-real-time energy production & consumption data.
+        **This Covid Dashboard estimates the actual prevalence of covid in different states.**
+        It can be used to see the new and probable new cases in different areas over time.
 
         ### Data Source
-        Energy Planner utilizes near-real-time energy production & consumption data from [BPA 
-        Balancing Authority](https://www.bpa.gov/news/AboutUs/Pages/default.aspx).
-        The [data source](https://transmission.bpa.gov/business/operations/Wind/baltwg.aspx) 
-        **updates every 5 minutes**. 
+        This dashboard utilizes case data from the [Centers for Disease Control and Prevention]
+        (https://www.cdc.gov/). \n
+        The [data source](https://data.cdc.gov/Case-Surveillance/United-States-COVID-19-Cases-and-Deaths-by-State-o/9mfq-cb36) 
+        **updates twice every 24 hours**. 
         ''', className='eleven columns', style={'paddingLeft': '5%'})], className="row")
 
 
