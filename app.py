@@ -1,6 +1,6 @@
 import dash
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
 import numpy as np
 import plotly.graph_objects as go
 
@@ -100,6 +100,90 @@ def what_if_description():
     ], className="row")
 
 
+def covid_tool():
+    """
+    Returns the covid dashboard tool as a dash `html.Div`. 
+    """
+    return html.Div(children=[
+        html.Div(children=[dcc.Graph(id='cases-figure')], className='nine columns'),
+
+        html.Div(children=[
+            html.H5("State/Region:", style={'marginTop': '2rem'}),
+            html.Div(children=[
+                dcc.Dropdown(
+                    id='state-dropdown',
+                    options=[
+                        {'label': 'Alabama', 'value': 'AL'},
+                        {'label': 'Alaska', 'value': 'AK'},
+                        {'label': 'American Samoa', 'value': 'AS'},
+                        {'label': 'Arizona', 'value': 'AZ'},
+                        {'label': 'Arkansas', 'value': 'AR'},
+                        {'label': 'California', 'value': 'CA'},
+                        {'label': 'Colorado', 'value': 'CO'},
+                        {'label': 'Connecticut', 'value': 'CT'},
+                        {'label': 'Delaware', 'value': 'DE'},
+                        {'label': 'District of Columbia', 'value': 'DC'},
+                        {'label': 'Florida', 'value': 'FL'},
+                        {'label': 'Federated States of Micronesia', 'value': 'FSM'},
+                        {'label': 'Georgia', 'value': 'GA'},
+                        {'label': 'Guam', 'value': 'GU'},
+                        {'label': 'Hawaii', 'value': 'HI'},
+                        {'label': 'Idaho', 'value': 'ID'},
+                        {'label': 'Illinois', 'value': 'IL'},
+                        {'label': 'Indiana', 'value': 'IN'},
+                        {'label': 'Iowa', 'value': 'IA'},
+                        {'label': 'Kansas', 'value': 'KS'},
+                        {'label': 'Kentucky', 'value': 'KY'},
+                        {'label': 'Louisiana', 'value': 'LA'},
+                        {'label': 'Maine', 'value': 'ME'},
+                        {'label': 'Maryland', 'value': 'MD'},
+                        {'label': 'Massachusetts', 'value': 'MA'},
+                        {'label': 'Michigan', 'value': 'MI'},
+                        {'label': 'Minnesota', 'value': 'MN'},
+                        {'label': 'Mississippi', 'value': 'MS'},
+                        {'label': 'Missouri', 'value': 'MO'},
+                        {'label': 'Montana', 'value': 'MT'},
+                        {'label': 'Nebraska', 'value': 'NE'},
+                        {'label': 'Nevada', 'value': 'NV'},
+                        {'label': 'New Hampshire', 'value': 'NH'},
+                        {'label': 'New Jersey', 'value': 'NJ'},
+                        {'label': 'New Mexico', 'value': 'NM'},
+                        {'label': 'New York', 'value': 'NY'},
+                        {'label': 'New York City', 'value': 'NYC'},
+                        {'label': 'North Carolina', 'value': 'NC'},
+                        {'label': 'North Dakota', 'value': 'ND'},
+                        {'label': 'Northern Mariana Islands', 'value': 'MP'},
+                        {'label': 'Ohio', 'value': 'OH'},
+                        {'label': 'Oklahoma', 'value': 'OK'},
+                        {'label': 'Oregon', 'value': 'OR'},
+                        {'label': 'Palau', 'value': 'PW'},
+                        {'label': 'Pennsylvania', 'value': 'PA'},
+                        {'label': 'Puerto Rico', 'value': 'PR'},
+                        {'label': 'Rhode Island', 'value': 'RI'},
+                        {'label': 'Republic of the Marshall Islands', 'value': 'RMI'},
+                        {'label': 'South Carolina', 'value': 'SC'},
+                        {'label': 'South Dakota', 'value': 'SD'},
+                        {'label': 'Tennessee', 'value': 'TN'},
+                        {'label': 'Texas', 'value': 'TX'},
+                        {'label': 'Utah', 'value': 'UT'},
+                        {'label': 'Vermont', 'value': 'VT'},
+                        {'label': 'Virgin Islands', 'value': 'VI'},
+                        {'label': 'Virginia', 'value': 'VA'},
+                        {'label': 'Washington', 'value': 'WA'},
+                        {'label': 'West Virginia', 'value': 'WV'},
+                        {'label': 'Wisconsin', 'value': 'WI'},
+                        {'label': 'Wyoming', 'value': 'WY'}
+                    ],
+                    value="RI"
+                )
+            ], style={'marginTop': '1rem'}),
+
+            html.Div(id='state-text', style={'marginTop': '1rem'}),
+
+        ], className='three columns', style={'marginLeft': 5, 'marginTop': '10%'}),
+    ], className='row eleven columns')
+
+
 def what_if_tool():
     """
     Returns the What-If tool as a dash `html.Div`. The view is a 8:3 division between
@@ -124,7 +208,6 @@ def what_if_tool():
             html.Div(id='hydro-scale-text', style={'marginTop': '1rem'}),
         ], className='three columns', style={'marginLeft': 5, 'marginTop': '10%'}),
     ], className='row eleven columns')
-
 
 def architecture_summary():
     """
@@ -163,6 +246,7 @@ def dynamic_layout():
         what_if_description(),
         what_if_tool(),
         architecture_summary(),
+        covid_tool(),
     ], className='row', id='content')
 
 
@@ -209,6 +293,28 @@ def what_if_handler(wind, hydro):
                       plot_bgcolor='#23272c', paper_bgcolor='#23272c', yaxis_title='MW',
                       xaxis_title='Date/Time')
     return fig
+
+
+@app.callback(
+    dash.dependencies.Output('cases-figure', 'figure'),
+    [dash.dependencies.Input('state-dropdown', 'value')])
+def covid_handler(state):
+    return None
+    """Changes the region of the covid dashboard graph"""
+    # df = fetch_all_bpa_as_df(allow_cached=True)
+    # x = df['Datetime']
+    # supply = df['Wind'] * wind + df['Hydro'] * hydro + df['Fossil/Biomass'] + df['Nuclear']
+    # load = df['Load']
+
+    # fig = go.Figure()
+    # fig.add_trace(go.Scatter(x=x, y=supply, mode='none', name='supply', line={'width': 2, 'color': 'pink'},
+    #               fill='tozeroy'))
+    # fig.add_trace(go.Scatter(x=x, y=load, mode='none', name='demand', line={'width': 2, 'color': 'orange'},
+    #               fill='tonexty'))
+    # fig.update_layout(template='plotly_dark', title='Supply/Demand after Power Scaling',
+    #                   plot_bgcolor='#23272c', paper_bgcolor='#23272c', yaxis_title='MW',
+    #                   xaxis_title='Date/Time')
+    # return fig
 
 
 if __name__ == '__main__':
