@@ -3,6 +3,7 @@ from dash import dcc
 from dash import html
 import numpy as np
 import plotly.graph_objects as go
+import pandas
 
 from database import fetch_all_bpa_as_df
 
@@ -299,22 +300,22 @@ def what_if_handler(wind, hydro):
     dash.dependencies.Output('cases-figure', 'figure'),
     [dash.dependencies.Input('state-dropdown', 'value')])
 def covid_handler(state):
-    return None
     """Changes the region of the covid dashboard graph"""
-    # df = fetch_all_bpa_as_df(allow_cached=True)
-    # x = df['Datetime']
-    # supply = df['Wind'] * wind + df['Hydro'] * hydro + df['Fossil/Biomass'] + df['Nuclear']
-    # load = df['Load']
+    d = {'date': [1, 2, 4], 'new_case': [16, 30, 56], 'pnew_case': [53, 89, 164]}
+    df = pandas.DataFrame(data=d)
+    x = df['date']
+    cases = df['new_case']
+    pcases = df['pnew_case']
 
-    # fig = go.Figure()
-    # fig.add_trace(go.Scatter(x=x, y=supply, mode='none', name='supply', line={'width': 2, 'color': 'pink'},
-    #               fill='tozeroy'))
-    # fig.add_trace(go.Scatter(x=x, y=load, mode='none', name='demand', line={'width': 2, 'color': 'orange'},
-    #               fill='tonexty'))
-    # fig.update_layout(template='plotly_dark', title='Supply/Demand after Power Scaling',
-    #                   plot_bgcolor='#23272c', paper_bgcolor='#23272c', yaxis_title='MW',
-    #                   xaxis_title='Date/Time')
-    # return fig
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=x, y=cases, mode='none', name='new cases', line={'width': 2, 'color': 'pink'},
+                  fill='tozeroy'))
+    fig.add_trace(go.Scatter(x=x, y=pcases, mode='none', name='probably cases', line={'width': 2, 'color': 'orange'},
+                  fill='tonexty'))
+    fig.update_layout(template='plotly_dark', title='New and Probable Cases in ' + state,
+                      plot_bgcolor='#23272c', paper_bgcolor='#23272c', yaxis_title='Cases',
+                      xaxis_title='Date')
+    return fig
 
 
 if __name__ == '__main__':
