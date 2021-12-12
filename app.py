@@ -16,8 +16,6 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 
 # Define component functions
-
-
 def page_header():
     """
     Returns the page header as a dash `html.Div`
@@ -52,6 +50,24 @@ def description():
         **updates twice every 24 hours**. 
         ''', className='eleven columns', style={'paddingLeft': '5%'})], className="row")
 
+
+def covid_per_cap(state):
+    df = fetch_all_bpa_as_df(state.lower())
+    if df is None:
+        return go.Figure()
+    
+    df['per_new_cases'] = (df['new_case']/df['tot_cases'])
+
+    fig = go.Figure(data=[go.Table(
+        header=dict(values=list(df.columns),
+                    fill_color='paleturquoise',
+                    align='left'),
+        cells=dict(values=[df.state, df.tot_cases, df.new_case, df.per_new_cases, df.date],
+                   fill_color='lavender',
+                   align='left'))
+    ])
+    
+    return fig
 
 def covid_tool():
     """
@@ -127,7 +143,7 @@ def covid_tool():
                         {'label': 'Wisconsin', 'value': 'WI'},
                         {'label': 'Wyoming', 'value': 'WY'}
                     ],
-                    value="RI"
+                    value="NYC"
                 )
             ], style={'marginTop': '1rem'}),
 
@@ -169,8 +185,10 @@ def dynamic_layout():
         page_header(),
         html.Hr(),
         description(),
-        architecture_summary(),
+        dcc.Graph(id='covid-trend-graph', figure=covid_per_cap('ri')),
         covid_tool(),
+        architecture_summary(),
+
     ], className='row', id='content')
 
 
@@ -186,6 +204,7 @@ app.layout = dynamic_layout
 def covid_handler(state):
     """Changes the region of the covid dashboard graph"""
     df = fetch_all_bpa_as_df(state.lower())
+    df = df.sort_values(by='date')
     x = df['date']
     cases = df['new_case']
     pcases = df['pnew_case']
@@ -193,31 +212,13 @@ def covid_handler(state):
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=x, y=cases, mode='none', name='new cases', line={'width': 2, 'color': 'pink'},
                   fill='tozeroy'))
-    fig.add_trace(go.Scatter(x=x, y=pcases, mode='none', name='probably cases', line={'width': 2, 'color': 'orange'},
+    fig.add_trace(go.Scatter(x=x, y=pcases, mode='none', name='probable cases', line={'width': 2, 'color': 'orange'},
                   fill='tonexty'))
     fig.update_layout(template='plotly_dark', title='New and Probable Cases in ' + state,
                       plot_bgcolor='#23272c', paper_bgcolor='#23272c', yaxis_title='Cases',
                       xaxis_title='Date')
     return fig
 
-def covid_per_cap(state):
-
-    df = fetch_all_bpa_as_df(state.lower())
-    if df is None:
-        return go.Figure()
-    
-    df['per_new_cases'] = (df['new_case']/df['tot_cases'])
-
-    fig = go.Figure(data=[go.Table(
-        header=dict(values=list(df.columns),
-                    fill_color='paleturquoise',
-                    align='left'),
-        cells=dict(values=[df.state, df.tot_cases, df.new_case, df.per_new_cases, df.Datetime],
-                   fill_color='lavender',
-                   align='left'))
-    ])
-    
-    return fig
 
 if __name__ == '__main__':
     app.run_server(debug=True, port=1050, host='0.0.0.0')
