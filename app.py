@@ -5,7 +5,7 @@ import numpy as np
 import plotly.graph_objects as go
 import pandas
 
-from database import fetch_all_bpa_as_df
+from database import fetch_all_data_as_df
 
 # Definitions of constants. This projects uses extra CSS stylesheet at `./assets/style.css`
 COLORS = ['rgb(67,67,67)', 'rgb(115,115,115)', 'rgb(49,130,189)', 'rgb(189,189,189)']
@@ -51,7 +51,7 @@ def description():
 
 
 def covid_per_cap(state):
-    df = fetch_all_bpa_as_df(state.lower())
+    df = fetch_all_data_as_df(state.lower())
     if df is None:
         return go.Figure()
     
@@ -201,7 +201,7 @@ app.layout = dynamic_layout
     [dash.dependencies.Input('state-dropdown', 'value')])
 def covid_handler(state):
     """Changes the region of the covid dashboard graph"""
-    df = fetch_all_bpa_as_df(state.lower())
+    df = fetch_all_data_as_df(state.lower())
     df = df.sort_values(by='date')
     x = df['date']
     cases = df['new_case']

@@ -6,7 +6,7 @@ import requests
 from io import StringIO
 
 import utils
-from database import upsert_bpa
+from database import upsert_data
 
 DOWNLOAD_URL = "https://data.cdc.gov/api/views/9mfq-cb36/rows.csv?accessType=DOWNLOAD"
 MAX_DOWNLOAD_ATTEMPT = 5
@@ -42,7 +42,7 @@ def filter_csv(text):
 def update_once():
     csv = download_csv()
     df = filter_csv(csv)
-    upsert_bpa(df)
+    upsert_data(df)
 
 def main_loop(timeout=DOWNLOAD_PERIOD):
     scheduler = sched.scheduler(time.time, time.sleep)
