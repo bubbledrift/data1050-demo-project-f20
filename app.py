@@ -53,54 +53,6 @@ def description():
         ''', className='eleven columns', style={'paddingLeft': '5%'})], className="row")
 
 
-def static_stacked_trend_graph(stack=False):
-    """
-    Returns scatter line plot of all power sources and power load.
-    If `stack` is `True`, the 4 power sources are stacked together to show the overall power
-    production.
-    """
-    df = fetch_all_bpa_as_df()
-    if df is None:
-        return go.Figure()
-    sources = ['Wind', 'Hydro', 'Fossil/Biomass', 'Nuclear']
-    x = df['Datetime']
-    fig = go.Figure()
-    for i, s in enumerate(sources):
-        fig.add_trace(go.Scatter(x=x, y=df[s], mode='lines', name=s,
-                                 line={'width': 2, 'color': COLORS[i]},
-                                 stackgroup='stack' if stack else None))
-    fig.add_trace(go.Scatter(x=x, y=df['Load'], mode='lines', name='Load',
-                             line={'width': 2, 'color': 'orange'}))
-    title = 'Energy Production & Consumption under BPA Balancing Authority'
-    if stack:
-        title += ' [Stacked]'
-    fig.update_layout(template='plotly_dark',
-                      title=title,
-                      plot_bgcolor='#23272c',
-                      paper_bgcolor='#23272c',
-                      yaxis_title='MW',
-                      xaxis_title='Date/Time')
-    return fig
-
-
-def what_if_description():
-    """
-    Returns description of "What-If" - the interactive component
-    """
-    return html.Div(children=[
-        dcc.Markdown('''
-        # " What If "
-        So far, BPA has been relying on hydro power to balance the demand and supply of power. 
-        Could our city survive an outage of hydro power and use up-scaled wind power as an
-        alternative? Find below **what would happen with 2.5x wind power and no hydro power at 
-        all**.   
-        Feel free to try out more combinations with the sliders. For the clarity of demo code,
-        only two sliders are included here. A fully-functioning What-If tool should support
-        playing with other interesting aspects of the problem (e.g. instability of load).
-        ''', className='eleven columns', style={'paddingLeft': '5%'})
-    ], className="row")
-
-
 def covid_tool():
     """
     Returns the covid dashboard tool as a dash `html.Div`. 
@@ -185,31 +137,6 @@ def covid_tool():
     ], className='row eleven columns')
 
 
-def what_if_tool():
-    """
-    Returns the What-If tool as a dash `html.Div`. The view is a 8:3 division between
-    demand-supply plot and rescale sliders.
-    """
-    return html.Div(children=[
-        html.Div(children=[dcc.Graph(id='what-if-figure')], className='nine columns'),
-
-        html.Div(children=[
-            html.H5("Rescale Power Supply", style={'marginTop': '2rem'}),
-            html.Div(children=[
-                dcc.Slider(id='wind-scale-slider', min=0, max=4, step=0.1, value=2.5, className='row',
-                           marks={x: str(x) for x in np.arange(0, 4.1, 1)})
-            ], style={'marginTop': '5rem'}),
-
-            html.Div(id='wind-scale-text', style={'marginTop': '1rem'}),
-
-            html.Div(children=[
-                dcc.Slider(id='hydro-scale-slider', min=0, max=4, step=0.1, value=0,
-                           className='row', marks={x: str(x) for x in np.arange(0, 4.1, 1)})
-            ], style={'marginTop': '3rem'}),
-            html.Div(id='hydro-scale-text', style={'marginTop': '1rem'}),
-        ], className='three columns', style={'marginLeft': 5, 'marginTop': '10%'}),
-    ], className='row eleven columns')
-
 def architecture_summary():
     """
     Returns the text and image of architecture summary of the project.
@@ -242,10 +169,6 @@ def dynamic_layout():
         page_header(),
         html.Hr(),
         description(),
-        # dcc.Graph(id='trend-graph', figure=static_stacked_trend_graph(stack=False)),
-        dcc.Graph(id='stacked-trend-graph', figure=static_stacked_trend_graph(stack=True)),
-        what_if_description(),
-        what_if_tool(),
         architecture_summary(),
         covid_tool(),
     ], className='row', id='content')
@@ -258,70 +181,11 @@ app.layout = dynamic_layout
 # Defines the dependencies of interactive components
 
 @app.callback(
-    dash.dependencies.Output('wind-scale-text', 'children'),
-    [dash.dependencies.Input('wind-scale-slider', 'value')])
-def update_wind_sacle_text(value):
-    """Changes the display text of the wind slider"""
-    return "Wind Power Scale {:.2f}x".format(value)
-
-
-@app.callback(
-    dash.dependencies.Output('hydro-scale-text', 'children'),
-    [dash.dependencies.Input('hydro-scale-slider', 'value')])
-def update_hydro_sacle_text(value):
-    """Changes the display text of the hydro slider"""
-    return "Hydro Power Scale {:.2f}x".format(value)
-
-
-
-@app.callback(
-    dash.dependencies.Output('what-if-figure', 'figure'),
-    [dash.dependencies.Input('wind-scale-slider', 'value'),
-     dash.dependencies.Input('hydro-scale-slider', 'value')])
-def what_if_handler(wind, hydro):
-    """Changes the display graph of supply-demand"""
-    df = fetch_all_bpa_as_df(allow_cached=True)
-    x = df['Datetime']
-    supply = df['Wind'] * wind + df['Hydro'] * hydro + df['Fossil/Biomass'] + df['Nuclear']
-    load = df['Load']
-
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=x, y=supply, mode='none', name='supply', line={'width': 2, 'color': 'pink'},
-                  fill='tozeroy'))
-    fig.add_trace(go.Scatter(x=x, y=load, mode='none', name='demand', line={'width': 2, 'color': 'orange'},
-                  fill='tonexty'))
-    fig.update_layout(template='plotly_dark', title='Supply/Demand after Power Scaling',
-                      plot_bgcolor='#23272c', paper_bgcolor='#23272c', yaxis_title='MW',
-                      xaxis_title='Date/Time')
-    return fig
-
-
-@app.callback(
     dash.dependencies.Output('cases-figure', 'figure'),
     [dash.dependencies.Input('state-dropdown', 'value')])
 def covid_handler(state):
     """Changes the region of the covid dashboard graph"""
-    d = {'date': [1, 2, 4], 'new_case': [16, 30, 56], 'pnew_case': [53, 89, 164]}
-    df = pandas.DataFrame(data=d)
-    x = df['date']
-    cases = df['new_case']
-    pcases = df['pnew_case']
-
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=x, y=cases, mode='none', name='new cases', line={'width': 2, 'color': 'pink'},
-                  fill='tozeroy'))
-    fig.add_trace(go.Scatter(x=x, y=pcases, mode='none', name='probably cases', line={'width': 2, 'color': 'orange'},
-                  fill='tonexty'))
-    fig.update_layout(template='plotly_dark', title='New and Probable Cases in ' + state,
-                      plot_bgcolor='#23272c', paper_bgcolor='#23272c', yaxis_title='Cases',
-                      xaxis_title='Date')
-    return fig
-
-
-def covid_handler(state):
-    """Changes the region of the covid dashboard graph"""
-    d = {'date': [1, 2, 4], 'new_case': [16, 30, 56], 'pnew_case': [53, 89, 164]}
-    df = pandas.DataFrame(data=d)
+    df = fetch_all_bpa_as_df(state.lower())
     x = df['date']
     cases = df['new_case']
     pcases = df['pnew_case']
@@ -338,7 +202,7 @@ def covid_handler(state):
 
 def covid_per_cap(state):
 
-    df = fetch_all_bpa_as_df(state)
+    df = fetch_all_bpa_as_df(state.lower())
     if df is None:
         return go.Figure()
     
