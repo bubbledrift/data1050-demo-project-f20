@@ -58,7 +58,7 @@ def covid_per_cap(state):
     df['per_new_cases'] = (df['new_case']/df['tot_cases'])
 
     fig = go.Figure(data=[go.Table(
-        header=dict(values=list(df.columns),
+        header=dict(values=['state', 'total cases', 'new cases', 'per new cases', 'date'],
                     fill_color='paleturquoise',
                     align='left'),
         cells=dict(values=[df.state, df.tot_cases, df.new_case, df.per_new_cases, df.date],
